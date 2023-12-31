@@ -5,7 +5,7 @@ nltk.download('stopwords')
 from nltk.stem import PorterStemmer
 
 # ======================================================================================================================
-# Note: Preprocessing implementation was taken from homework assignment 1
+# Note: Parts of preprocessing implementation were taken from homework assignment 1
 # ======================================================================================================================
 
 
