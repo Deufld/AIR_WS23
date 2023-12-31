@@ -1,0 +1,44 @@
+import pandas as pd
+from pathlib import Path
+
+
+def read_csv(
+    filename: str,
+    relevant_columns: list[str],
+    testing: bool) -> pd.DataFrame:
+    """
+        Args:
+            filename (str): The filename of the CSV file to read
+            relevant_columns (list[str]): columns to read from the csv file
+            testing (bool): if true, the method will only return a portion of the entire CSV file which can then be
+                            used to have faster test times
+        Returns:
+            data (pd.DataFrame): The data read from the csv as a DataFrame
+        """
+
+    # check if file exists
+    path = Path(filename)
+    if not path.exists():
+        raise FileNotFoundError
+
+    data = None
+    # if no relevant columns are provided, all columns are read
+    if len(relevant_columns) == 0:
+        data = pd.read_csv(path, encoding='latin-1')
+    else:
+        data = pd.read_csv(path, usecols=relevant_columns, encoding='latin-1')
+
+    if testing:
+        # only take 1/100 of the entire data, for testing purposes only
+        testing_len = int(len(data) / 1000)
+        return data.head(testing_len)
+
+    return data
+
+#test
+def write_csv(
+    filename: str,
+    df: pd.DataFrame
+):
+    path = Path(filename)
+    df.to_csv(path_or_buf=path, index=False)
