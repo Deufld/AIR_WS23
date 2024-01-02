@@ -1,3 +1,4 @@
+from ast import literal_eval
 import pandas as pd
 from pathlib import Path
 
@@ -24,9 +25,10 @@ def read_csv(
     data = None
     # if no relevant columns are provided, all columns are read
     if len(relevant_columns) == 0:
-        data = pd.read_csv(path, encoding='latin-1')
+        # https://stackoverflow.com/questions/23111990/pandas-dataframe-stored-list-as-string-how-to-convert-back-to-list
+        data = pd.read_csv(path, encoding='latin-1', converters={'preprocessed_text': literal_eval})
     else:
-        data = pd.read_csv(path, usecols=relevant_columns, encoding='latin-1')
+        data = pd.read_csv(path, usecols=relevant_columns, encoding='latin-1', converters={'preprocessed_text': literal_eval})
 
     if testing:
         # only take 1/100 of the entire data, for testing purposes only
