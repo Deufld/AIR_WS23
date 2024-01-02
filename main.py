@@ -22,7 +22,7 @@ def perform_sentiment_classification():
     global negative_preprocessed_data, neutral_preprocessed_data, positive_preprocessed_data
 
     # TODO: replace True with False, this is only for testing purposes
-    unprocessed_data = io_util.read_csv('data/training.1600000.processed.noemoticon.csv', ['text'], True)
+    unprocessed_data = io_util.read_csv('data/training.1600000.processed.noemoticon.csv', ['id', 'text'], True)
     negative_unprocessed_data, neutral_unprocessed_data, positive_unprocessed_data \
         = sentiment.create_sentiment_dataframes(unprocessed_data)
 

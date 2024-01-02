@@ -22,9 +22,9 @@ model = model.to(device)
 def create_sentiment_dataframes(
     unprocessed_data: pd.DataFrame
 ):
-    negative_unprocessed_data = pd.DataFrame(columns=['text'])
-    neutral_unprocessed_data = pd.DataFrame(columns=['text'])
-    positive_unprocessed_data = pd.DataFrame(columns=['text'])
+    negative_unprocessed_data = pd.DataFrame(columns=['id', 'text', 'sentiment'])
+    neutral_unprocessed_data = pd.DataFrame(columns=['id', 'text', 'sentiment'])
+    positive_unprocessed_data = pd.DataFrame(columns=['id', 'text', 'sentiment'])
 
     print("classification process started".center(80, "="))
 
@@ -34,14 +34,15 @@ def create_sentiment_dataframes(
             print(str(index / int(len(unprocessed_data) / 10) * 10) + "% of classification has been completed")
 
         text = row['text']
-
         sentiment = get_sentiment_of_text(text)
+
+        row_to_append = [row['id'], text, sentiment]
         if sentiment == config.id2label[0]:
-            negative_unprocessed_data.loc[len(negative_unprocessed_data)] = row
+            negative_unprocessed_data.loc[len(negative_unprocessed_data)] = row_to_append
         elif sentiment == config.id2label[1]:
-            neutral_unprocessed_data.loc[len(neutral_unprocessed_data)] = row
+            neutral_unprocessed_data.loc[len(neutral_unprocessed_data)] = row_to_append
         else:
-            positive_unprocessed_data.loc[len(positive_unprocessed_data)] = row
+            positive_unprocessed_data.loc[len(positive_unprocessed_data)] = row_to_append
 
     print("classification has been completed".center(80, "="))
 
