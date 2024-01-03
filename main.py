@@ -6,6 +6,7 @@ import pandas as pd
 
 from IR.bm25 import BM25
 from IR.tfidf import TFIDF
+from IR.bert import BERT
 
 # Datasets
 negative_preprocessed_data = None
@@ -190,7 +191,8 @@ def send_query():
 
     elif ir_method == 'tfidf':
         if 'negative' in sentiments and 'positive' in sentiments and 'neutral' in sentiments:
-            retrieved_documents = negative_positive_neutral_tfidf.retrieve_n_most_relevant_documents(preprocessed_query, n)
+            retrieved_documents = negative_positive_neutral_tfidf.retrieve_n_most_relevant_documents(preprocessed_query,
+                                                                                                     n)
         elif 'negative' in sentiments and 'positive' in sentiments:
             retrieved_documents = negative_positive_tfidf.retrieve_n_most_relevant_documents(preprocessed_query, n)
         elif 'positive' in sentiments and 'neutral' in sentiments:
@@ -208,8 +210,25 @@ def send_query():
 
     print(tabulate(retrieved_documents, headers='keys', tablefmt='grid', showindex=False, maxcolwidths=[10, 34, 10, 10]))
 
+    bert_option = input("Enter [yes;no] if you want the results to be re-ranked with BERT: ")
+    if bert_option not in ['yes', 'no']:
+        print("Invalid/not supported answer for BERT!")
+        return
+
+    if bert_option == 'yes':
+        output_bert_df = bert.rerank_with_bert(retrieved_documents, query_str, n)
+
+        print(f"Query: {query_str}")
+        print(f"\nTop {n} most similar sentences in corpus:")
+        print(tabulate(output_bert_df, headers='keys', tablefmt='grid', showindex=False, maxcolwidths=[50, 10]))
+    elif bert_option == 'no':
+        return
+
 
 print("Program started".center(80, "="))
+
+# initialize BERT
+bert = BERT()
 while True:
     print_help()
     try:
