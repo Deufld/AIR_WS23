@@ -34,15 +34,18 @@ def create_sentiment_dataframes(
             print(str(index / int(len(unprocessed_data) / 10) * 10) + "% of classification has been completed")
 
         text = row['text']
-        sentiment = get_sentiment_of_text(text)
+        try:
+            sentiment = get_sentiment_of_text(text)
 
-        row_to_append = [row['id'], text, sentiment]
-        if sentiment == config.id2label[0]:
-            negative_unprocessed_data.loc[len(negative_unprocessed_data)] = row_to_append
-        elif sentiment == config.id2label[1]:
-            neutral_unprocessed_data.loc[len(neutral_unprocessed_data)] = row_to_append
-        else:
-            positive_unprocessed_data.loc[len(positive_unprocessed_data)] = row_to_append
+            row_to_append = [row['id'], text, sentiment]
+            if sentiment == config.id2label[0]:
+                negative_unprocessed_data.loc[len(negative_unprocessed_data)] = row_to_append
+            elif sentiment == config.id2label[1]:
+                neutral_unprocessed_data.loc[len(neutral_unprocessed_data)] = row_to_append
+            else:
+                positive_unprocessed_data.loc[len(positive_unprocessed_data)] = row_to_append
+        except:
+            continue
 
     print("classification has been completed".center(80, "="))
 
