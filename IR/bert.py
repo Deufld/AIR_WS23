@@ -14,7 +14,7 @@ class BERT:
         query_embeddings = self.embedder.encode(queries)
         closest_n = n
 
-        output_df = pd.DataFrame(columns=['Sentence', 'Score'])
+        output_df = pd.DataFrame(columns=['id', 'text', 'score'])
 
         for query, query_embedding in zip(queries, query_embeddings):
             distances = scipy.spatial.distance.cdist([query_embedding], corpus_embeddings, "cosine")[0]
@@ -23,6 +23,6 @@ class BERT:
             results = sorted(results, key=lambda x: x[1])
 
             for idx, distance in results[0:closest_n]:
-                output_df.loc[len(output_df.index)] = [retrieved_documents['text'].iloc[idx].strip(), 1 - distance]
+                output_df.loc[len(output_df.index)] = [retrieved_documents['id'].iloc[idx], retrieved_documents['text'].iloc[idx].strip(), 1 - distance]
 
         return output_df

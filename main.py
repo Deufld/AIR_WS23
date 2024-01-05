@@ -7,6 +7,7 @@ import pandas as pd
 from IR.bm25 import BM25
 from IR.tfidf import TFIDF
 from IR.bert import BERT
+from evaluation import Evaluation
 
 # Datasets
 negative_preprocessed_data = None
@@ -35,12 +36,14 @@ negative_neutral_bm25 = None
 positive_neutral_bm25 = None
 negative_positive_neutral_bm25 = None
 
+
 def print_help():
     print("possible actions".center(80, '='))
     print("[1] perform sentiment classification and preprocessing on dataset")
     print("[2] load preprocessed and classified data from csv-files")
     print("[3] send query")
-    print("[4] quit program")
+    print("[4] do evaluation")
+    print("[5] quit program")
     print("".center(80, '='))
 
 
@@ -55,7 +58,8 @@ def perform_sentiment_classification():
 
     # TODO: replace True with False, this is only for testing purposes
     unprocessed_data = io_util.read_csv('data/training.1600000.processed.noemoticon.csv', ['id', 'text'], True)
-    negative_unprocessed_data, neutral_unprocessed_data, positive_unprocessed_data = sentiment.create_sentiment_dataframes(unprocessed_data)
+    negative_unprocessed_data, neutral_unprocessed_data, positive_unprocessed_data = sentiment.create_sentiment_dataframes(
+        unprocessed_data)
 
     negative_preprocessed_data = preprocessing.preprocess_data(negative_unprocessed_data)
     neutral_preprocessed_data = preprocessing.preprocess_data(neutral_unprocessed_data)
@@ -64,7 +68,8 @@ def perform_sentiment_classification():
     negative_positive_preprocessed_data = pd.concat([negative_preprocessed_data, positive_preprocessed_data])
     negative_neutral_preprocessed_data = pd.concat([negative_preprocessed_data, neutral_preprocessed_data])
     positive_neutral_preprocessed_data = pd.concat([positive_preprocessed_data, neutral_preprocessed_data])
-    negative_positive_neutral_preprocessed_data = pd.concat([negative_preprocessed_data, positive_preprocessed_data, neutral_preprocessed_data])
+    negative_positive_neutral_preprocessed_data = pd.concat(
+        [negative_preprocessed_data, positive_preprocessed_data, neutral_preprocessed_data])
 
     # TF-IDF
     negative_tfidf = TFIDF(["negative"], negative_preprocessed_data, False)
@@ -73,7 +78,8 @@ def perform_sentiment_classification():
     negative_positive_tfidf = TFIDF(["negative", "positive"], negative_positive_preprocessed_data, False)
     negative_neutral_tfidf = TFIDF(["negative", "neutral"], negative_neutral_preprocessed_data, False)
     positive_neutral_tfidf = TFIDF(["positive", "neutral"], positive_neutral_preprocessed_data, False)
-    negative_positive_neutral_tfidf = TFIDF(["negative", "positive", "neutral"], negative_positive_neutral_preprocessed_data, False)
+    negative_positive_neutral_tfidf = TFIDF(["negative", "positive", "neutral"],
+                                            negative_positive_neutral_preprocessed_data, False)
 
     # BM25
     negative_bm25 = BM25(["negative"], negative_preprocessed_data, False)
@@ -82,7 +88,8 @@ def perform_sentiment_classification():
     negative_positive_bm25 = BM25(["negative", "positive"], negative_positive_preprocessed_data, False)
     negative_neutral_bm25 = BM25(["negative", "neutral"], negative_neutral_preprocessed_data, False)
     positive_neutral_bm25 = BM25(["positive", "neutral"], positive_neutral_preprocessed_data, False)
-    negative_positive_neutral_bm25 = BM25(["negative", "positive", "neutral"], negative_positive_neutral_preprocessed_data, False)
+    negative_positive_neutral_bm25 = BM25(["negative", "positive", "neutral"],
+                                          negative_positive_neutral_preprocessed_data, False)
 
     io_util.write_csv('data/negative_dataset.csv', negative_preprocessed_data)
     io_util.write_csv('data/neutral_dataset.csv', neutral_preprocessed_data)
@@ -109,7 +116,8 @@ def load_sentiment_classification():
         negative_positive_preprocessed_data = pd.concat([negative_preprocessed_data, positive_preprocessed_data])
         negative_neutral_preprocessed_data = pd.concat([negative_preprocessed_data, neutral_preprocessed_data])
         positive_neutral_preprocessed_data = pd.concat([positive_preprocessed_data, neutral_preprocessed_data])
-        negative_positive_neutral_preprocessed_data = pd.concat([negative_preprocessed_data, positive_preprocessed_data, neutral_preprocessed_data])
+        negative_positive_neutral_preprocessed_data = pd.concat(
+            [negative_preprocessed_data, positive_preprocessed_data, neutral_preprocessed_data])
 
         # TF-IDF
         negative_tfidf = TFIDF(["negative"], negative_preprocessed_data, True)
@@ -118,7 +126,8 @@ def load_sentiment_classification():
         negative_positive_tfidf = TFIDF(["negative", "positive"], negative_positive_preprocessed_data, True)
         negative_neutral_tfidf = TFIDF(["negative", "neutral"], negative_neutral_preprocessed_data, True)
         positive_neutral_tfidf = TFIDF(["positive", "neutral"], positive_neutral_preprocessed_data, True)
-        negative_positive_neutral_tfidf = TFIDF(["negative", "positive", "neutral"], negative_positive_neutral_preprocessed_data, True)
+        negative_positive_neutral_tfidf = TFIDF(["negative", "positive", "neutral"],
+                                                negative_positive_neutral_preprocessed_data, True)
 
         # BM25
         negative_bm25 = BM25(["negative"], negative_preprocessed_data, True)
@@ -127,10 +136,12 @@ def load_sentiment_classification():
         negative_positive_bm25 = BM25(["negative", "positive"], negative_positive_preprocessed_data, True)
         negative_neutral_bm25 = BM25(["negative", "neutral"], negative_neutral_preprocessed_data, True)
         positive_neutral_bm25 = BM25(["positive", "neutral"], positive_neutral_preprocessed_data, False)
-        negative_positive_neutral_bm25 = BM25(["negative", "positive", "neutral"], negative_positive_neutral_preprocessed_data, True)
+        negative_positive_neutral_bm25 = BM25(["negative", "positive", "neutral"],
+                                              negative_positive_neutral_preprocessed_data, True)
 
     except FileNotFoundError:
         print("Files to load sentiment classification do not exist!")
+
 
 def send_query():
     global negative_preprocessed_data, neutral_preprocessed_data, positive_preprocessed_data
@@ -173,7 +184,8 @@ def send_query():
     retrieved_documents = None
     if ir_method == 'bm25':
         if 'negative' in sentiments and 'positive' in sentiments and 'neutral' in sentiments:
-            retrieved_documents = negative_positive_neutral_bm25.retrieve_n_most_relevant_documents(preprocessed_query, n)
+            retrieved_documents = negative_positive_neutral_bm25.retrieve_n_most_relevant_documents(preprocessed_query,
+                                                                                                    n)
         elif 'negative' in sentiments and 'positive' in sentiments:
             retrieved_documents = negative_positive_bm25.retrieve_n_most_relevant_documents(preprocessed_query, n)
         elif 'positive' in sentiments and 'neutral' in sentiments:
@@ -208,7 +220,8 @@ def send_query():
         else:
             print("This is really odd!")
 
-    print(tabulate(retrieved_documents, headers='keys', tablefmt='grid', showindex=False, maxcolwidths=[10, 34, 10, 10]))
+    print(
+        tabulate(retrieved_documents, headers='keys', tablefmt='grid', showindex=False, maxcolwidths=[10, 34, 10, 10]))
 
     bert_option = input("Enter [yes;no] if you want the results to be re-ranked with BERT: ")
     if bert_option not in ['yes', 'no']:
@@ -220,9 +233,18 @@ def send_query():
 
         print(f"Query: {query_str}")
         print(f"\nTop {n} most similar sentences in corpus:")
-        print(tabulate(output_bert_df, headers='keys', tablefmt='grid', showindex=False, maxcolwidths=[50, 10]))
+        print(tabulate(output_bert_df, headers='keys', tablefmt='grid', showindex=False, maxcolwidths=[10, 50, 10]))
     elif bert_option == 'no':
         return
+
+
+def do_evaluation():
+    if negative_bm25 is None:
+        print("Do [1] or [2] first!")
+        return
+
+    evaluation = Evaluation(negative_bm25, neutral_bm25, positive_bm25, negative_tfidf, neutral_tfidf, positive_tfidf)
+    evaluation.perform_evaluation()
 
 
 print("Program started".center(80, "="))
@@ -243,6 +265,8 @@ while True:
     elif operation == 3:
         send_query()
     elif operation == 4:
+        do_evaluation()
+    elif operation == 5:
         break
     else:
         print("Invalid operation!")
