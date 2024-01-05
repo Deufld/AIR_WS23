@@ -194,18 +194,3 @@ class Evaluation:
         average_recall = total_recall / len(predictions)
 
         return average_precision, average_recall, average_f1
-
-
-"""negative_preprocessed_data = io_util.read_csv('data/negative_dataset.csv', [], False)
-neutral_preprocessed_data = io_util.read_csv('data/neutral_dataset.csv', [], False)
-positive_preprocessed_data = io_util.read_csv('data/positive_dataset.csv', [], False)
-
-negative_bm25 = BM25(["negative"], negative_preprocessed_data, True)
-neutral_bm25 = BM25(["neutral"], neutral_preprocessed_data, True)
-positive_bm25 = BM25(["positive"], positive_preprocessed_data, True)
-
-negative_tfidf = TFIDF(["negative"], negative_preprocessed_data, True)
-neutral_tfidf = TFIDF(["neutral"], neutral_preprocessed_data, True)
-positive_tfidf = TFIDF(["positive"], positive_preprocessed_data, True)
-evaluation = Evaluation(negative_bm25, neutral_bm25, positive_bm25, negative_tfidf, neutral_tfidf, positive_tfidf)
-evaluation.perform_evaluation()"""
