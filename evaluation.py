@@ -4,8 +4,6 @@ import preprocessing
 import pandas as pd
 import os.path
 from IR.bert import BERT
-from IR.tfidf import TFIDF
-from IR.bm25 import BM25
 import csv
 
 
@@ -38,6 +36,21 @@ class Evaluation:
             output_bert_df = self.bert.rerank_with_bert(retrieved_documents, query_str, 5)
             dict_to_fill[qid] = output_bert_df['id'].values.tolist()
 
+    def read_ground_truth_csv(self, filename):
+        return_dict = dict()
+        with open(filename) as f:
+            reader = csv.reader(f, delimiter=',')
+            # skip header
+            next(reader)
+            for row in reader:
+                qid = int(row[0])
+                tmp_list = []
+                for field in row[1:]:
+                    only_numbers = int(''.join(filter(str.isdigit, field)))
+                    tmp_list.append(only_numbers)
+                return_dict[qid] = tmp_list
+        return return_dict
+
     def perform_evaluation(self):
         if os.path.exists('data/evaluation_results.csv'):
             with open('data/evaluation_results.csv') as f:
@@ -46,42 +59,41 @@ class Evaluation:
                     print(", ".join(row))
             return
         else:
-            try:
-                os.remove('data/ground_truth_bm25.csv')
-            except OSError:
-                pass
-            try:
-                os.remove('data/ground_truth_tfidf.csv')
-            except OSError:
-                pass
+            if os.path.exists('data/ground_truth_bm25.csv') and os.path.exists('data/ground_truth_tfidf.csv'):
+                self.ground_truth_dict_bm25 = self.read_ground_truth_csv('data/ground_truth_bm25.csv')
+                self.ground_truth_dict_tfidf = self.read_ground_truth_csv('data/ground_truth_tfidf.csv')
+            else:
+                self.generate_ground_truth(self.negative_queries, self.negative_bm25, self.ground_truth_dict_bm25)
+                self.generate_ground_truth(self.neutral_queries, self.neutral_bm25, self.ground_truth_dict_bm25)
+                self.generate_ground_truth(self.positive_queries, self.positive_bm25, self.ground_truth_dict_bm25)
 
-            self.generate_ground_truth(self.negative_queries, self.negative_bm25, self.ground_truth_dict_bm25)
-            self.generate_ground_truth(self.neutral_queries, self.neutral_bm25, self.ground_truth_dict_bm25)
-            self.generate_ground_truth(self.positive_queries, self.positive_bm25, self.ground_truth_dict_bm25)
+                self.generate_ground_truth(self.negative_queries, self.negative_tfidf, self.ground_truth_dict_tfidf)
+                self.generate_ground_truth(self.neutral_queries, self.neutral_tfidf, self.ground_truth_dict_tfidf)
+                self.generate_ground_truth(self.positive_queries, self.positive_tfidf, self.ground_truth_dict_tfidf)
 
-            self.generate_ground_truth(self.negative_queries, self.negative_tfidf, self.ground_truth_dict_tfidf)
-            self.generate_ground_truth(self.neutral_queries, self.neutral_tfidf, self.ground_truth_dict_tfidf)
-            self.generate_ground_truth(self.positive_queries, self.positive_tfidf, self.ground_truth_dict_tfidf)
+                with open('data/ground_truth_bm25.csv', 'a') as csv_file:
+                    csv_file.write('qid,docids\n')
+                    [csv_file.write('{0},{1}\n'.format(key, value)) for key, value in self.ground_truth_dict_bm25.items()]
 
-            with open('data/ground_truth_bm25.csv', 'a') as csv_file:
-                [csv_file.write('{0},{1}\n'.format(key, value)) for key, value in self.ground_truth_dict_bm25.items()]
-
-            with open('data/ground_truth_tfidf.csv', 'a') as csv_file:
-                [csv_file.write('{0},{1}\n'.format(key, value)) for key, value in self.ground_truth_dict_tfidf.items()]
+                with open('data/ground_truth_tfidf.csv', 'a') as csv_file:
+                    csv_file.write('qid,docids\n')
+                    [csv_file.write('{0},{1}\n'.format(key, value)) for key, value in self.ground_truth_dict_tfidf.items()]
 
         self.evaluate_bm25()
         self.evaluate_bm25_with_bert()
         self.evaluate_tfidf()
-        self.evaluate_bm25_with_bert()
+        self.evaluate_tfidf_with_bert()
 
     def write_to_evaluation_csv(self, function_name, precision, recall, f1):
-        with open('data/evaluation_results2.csv', 'a') as f:
+        with open('data/evaluation_results.csv', 'a') as f:
             # Define the data to be written
             data = [f"{function_name}: Precision: {precision}, Recall: {recall}, F1: {f1}"]
             for line in data:
                 f.write(line + '\n')
+                print(line)
 
-    def create_predictions_for_queries(self, queries, object_for_calculation, prediction_dict, bert):
+    def create_predictions_for_queries(self, queries, object_for_calculation, bert):
+        prediction_dict = dict()
         for index, row in queries.iterrows():
             qid = row['qid']
             query_str = row['text']
@@ -92,62 +104,42 @@ class Evaluation:
                 output_bert_df = self.bert.rerank_with_bert(retrieved_documents, query_str, 5)
                 prediction_dict[qid] = output_bert_df['id'].values.tolist()
             else:
+                retrieved_documents = retrieved_documents.head(5)
                 prediction_dict[qid] = retrieved_documents['id'].values.tolist()
 
         return prediction_dict
 
     def evaluate_bm25(self):
-        pass
-        # Welche queries?
-        # negative_queries = ...
-        # neutral_queries = ...
-        # positive_queries = ...
+        predictions = self.create_predictions_for_queries(self.negative_queries, self.negative_bm25, False)
+        predictions.update(self.create_predictions_for_queries(self.neutral_queries, self.neutral_bm25, False))
+        predictions.update(self.create_predictions_for_queries(self.positive_queries, self.positive_bm25, False))
 
-        # predictions = create_predictions_for_queries(negative_queries, self.negative_bm25, False)
-        # predictions.update(create_predictions_for_queries(neutral_queries, self.neutral_bm25, False))
-        # predictions.update(create_predictions_for_queries(positive_queries, self.positive_bm25, False))
-
-        # precision, recall, f1 = validate_F1k(self.ground_truth_dict_bm25, predictions)
-        # self.write_to_evaluation_csv("evaluate_bm25", precision, recall, f1)
+        precision, recall, f1 = self.validate_F1k(self.ground_truth_dict_tfidf, predictions)
+        self.write_to_evaluation_csv("evaluate_bm25", precision, recall, f1)
 
     def evaluate_bm25_with_bert(self):
-        pass
-        # negative_queries = ...
-        # neutral_queries = ...
-        # positive_queries = ...
+        predictions = self.create_predictions_for_queries(self.negative_queries, self.negative_bm25, True)
+        predictions.update(self.create_predictions_for_queries(self.neutral_queries, self.neutral_bm25, True))
+        predictions.update(self.create_predictions_for_queries(self.positive_queries, self.positive_bm25, True))
 
-        # predictions = create_predictions_for_queries(negative_queries, self.negative_bm25, True)
-        # predictions.update(create_predictions_for_queries(neutral_queries, self.neutral_bm25, True))
-        # predictions.update(create_predictions_for_queries(positive_queries, self.positive_bm25, True))
-
-        # precision, recall, f1 = validate_F1k(self.ground_truth_dict_bm25, predictions)
-        # self.write_to_evaluation_csv("evaluate_bm25_with_bert", precision, recall, f1)
+        precision, recall, f1 = self.validate_F1k(self.ground_truth_dict_tfidf, predictions)
+        self.write_to_evaluation_csv("evaluate_bm25_with_bert", precision, recall, f1)
 
     def evaluate_tfidf(self):
-        pass
-        # negative_queries = ...
-        # neutral_queries = ...
-        # positive_queries = ...
+        predictions = self.create_predictions_for_queries(self.negative_queries, self.negative_tfidf, False)
+        predictions.update(self.create_predictions_for_queries(self.neutral_queries, self.neutral_tfidf, False))
+        predictions.update(self.create_predictions_for_queries(self.positive_queries, self.positive_tfidf, False))
 
-        # predictions = create_predictions_for_queries(negative_queries, self.negative_tfidf, False)
-        # predictions.update(create_predictions_for_queries(neutral_queries, self.neutral_tfidf, False))
-        # predictions.update(create_predictions_for_queries(positive_queries, self.positive_tfidf, False))
-
-        # precision, recall, f1 = validate_F1k(self.ground_truth_dict_tfidf, predictions)
-        # self.write_to_evaluation_csv("evaluate_tfidf", precision, recall, f1)
+        precision, recall, f1 = self.validate_F1k(self.ground_truth_dict_bm25, predictions)
+        self.write_to_evaluation_csv("evaluate_tfidf", precision, recall, f1)
 
     def evaluate_tfidf_with_bert(self):
-        pass
-        # negative_queries = ...
-        # neutral_queries = ...
-        # positive_queries = ...
+        predictions = self.create_predictions_for_queries(self.negative_queries, self.negative_tfidf, True)
+        predictions.update(self.create_predictions_for_queries(self.neutral_queries, self.neutral_tfidf, True))
+        predictions.update(self.create_predictions_for_queries(self.positive_queries, self.positive_tfidf, True))
 
-        # predictions = create_predictions_for_queries(negative_queries, self.negative_tfidf, True)
-        # predictions.update(create_predictions_for_queries(neutral_queries, self.neutral_tfidf, True))
-        # predictions.update(create_predictions_for_queries(positive_queries, self.positive_tfidf, True))
-
-        # precision, recall, f1 = validate_F1k(self.ground_truth_dict_tfidf, predictions)
-        # self.write_to_evaluation_csv("evaluate_tfidf_with_bert", precision, recall, f1)
+        precision, recall, f1 = self.validate_F1k(self.ground_truth_dict_bm25, predictions)
+        self.write_to_evaluation_csv("evaluate_tfidf_with_bert", precision, recall, f1)
 
     def get_precision_and_recall_k(self, prediction_docs: list[str], ground_truth_docs: list[str], k: int) -> (
     float, float):

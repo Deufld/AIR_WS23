@@ -135,7 +135,7 @@ def load_sentiment_classification():
         positive_bm25 = BM25(["positive"], positive_preprocessed_data, True)
         negative_positive_bm25 = BM25(["negative", "positive"], negative_positive_preprocessed_data, True)
         negative_neutral_bm25 = BM25(["negative", "neutral"], negative_neutral_preprocessed_data, True)
-        positive_neutral_bm25 = BM25(["positive", "neutral"], positive_neutral_preprocessed_data, False)
+        positive_neutral_bm25 = BM25(["positive", "neutral"], positive_neutral_preprocessed_data, True)
         negative_positive_neutral_bm25 = BM25(["negative", "positive", "neutral"],
                                               negative_positive_neutral_preprocessed_data, True)
 
