@@ -1,4 +1,3 @@
-from tabulate import tabulate
 import io_util
 import preprocessing
 import pandas as pd
