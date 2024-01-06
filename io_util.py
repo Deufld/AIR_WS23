@@ -31,7 +31,7 @@ def read_csv(
         data = pd.read_csv(path, usecols=relevant_columns, encoding='latin-1', converters={'preprocessed_text': literal_eval})
 
     if testing:
-        # only take 1/100 of the entire data, for testing purposes only
+        # only take 1/1000 of the entire data, for testing purposes only
         testing_len = int(len(data) / 1000)
         return data.head(testing_len)
 
