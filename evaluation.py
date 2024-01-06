@@ -35,7 +35,7 @@ class Evaluation:
             output_bert_df = self.bert.rerank_with_bert(retrieved_documents, query_str, 5)
             dict_to_fill[qid] = output_bert_df['id'].values.tolist()
 
-    def read_ground_truth_csv(self, filename):
+    def read_ground_truth_csv(self, filename) -> dict():
         return_dict = dict()
         with open(filename) as f:
             reader = csv.reader(f, delimiter=',')
@@ -91,7 +91,7 @@ class Evaluation:
                 f.write(line + '\n')
                 print(line)
 
-    def create_predictions_for_queries(self, queries, object_for_calculation, bert):
+    def create_predictions_for_queries(self, queries, object_for_calculation, bert) -> dict():
         prediction_dict = dict()
         for index, row in queries.iterrows():
             qid = row['qid']
@@ -160,7 +160,7 @@ class Evaluation:
             recall = true_positives / len_ground_truth_docs
         return precision, recall
 
-    def validate_F1k(self, ground_truth_dict, predictions: dict[str, list[str]], k: int = 5) -> float:
+    def validate_F1k(self, ground_truth_dict, predictions: dict[str, list[str]], k: int = 5) -> (float, float, float):
         total_f1 = 0
         total_precision = 0
         total_recall = 0
