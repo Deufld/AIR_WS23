@@ -30,4 +30,4 @@ We created a CLI application, which allows the user to perform the following act
 * **[5] quit program**
   * Quits the program.
 ### Setup
-In order to use the CLI application, you have to download the above-mentioned dataset (https://www.kaggle.com/datasets/kazanova/sentiment140/) and install all the necessary libraries that are not yet installed on your local system. After those steps have been completed, the program can then be started by running the **main.py** file.
+In order to use the CLI application, you have to download the above-mentioned dataset (https://www.kaggle.com/datasets/kazanova/sentiment140/) and unzip the csv file into the data folder. Additionally, install all the necessary libraries that are not yet installed on your local system. After those steps have been completed, the program can then be started by running the **main.py** file.
