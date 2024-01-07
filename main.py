@@ -256,6 +256,7 @@ while True:
         operation = int(input("Enter action to perform: "))
     except ValueError:
         print("Invalid operation!")
+        continue
 
     if operation == 1:
         perform_sentiment_classification()
