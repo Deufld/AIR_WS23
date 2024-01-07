@@ -5,6 +5,7 @@ from gensim import corpora, models, similarities
 
 class TFIDF:
     def __init__(self, sentiments, documents, use_precomputed_tfidf_model=False):
+        # source: https://gist.github.com/clemsos/7692685
         self.sentiments = sentiments
         self.preprocessed_documents = documents["preprocessed_text"].copy()
         self.raw_documents = documents[["text", "id", "sentiment"]].copy()

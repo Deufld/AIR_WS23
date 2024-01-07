@@ -56,8 +56,8 @@ def perform_sentiment_classification():
     global negative_positive_tfidf, negative_neutral_tfidf, positive_neutral_tfidf, negative_positive_neutral_tfidf
     global negative_positive_bm25, negative_neutral_bm25, positive_neutral_bm25, negative_positive_neutral_bm25
 
-    # TODO: replace True with False, this is only for testing purposes
-    unprocessed_data = io_util.read_csv('data/training.1600000.processed.noemoticon.csv', ['id', 'text'], True)
+    # for testing purposes the boolean can be set to True
+    unprocessed_data = io_util.read_csv('data/training.1600000.processed.noemoticon.csv', ['id', 'text'], False)
     negative_unprocessed_data, neutral_unprocessed_data, positive_unprocessed_data = sentiment.create_sentiment_dataframes(
         unprocessed_data)
 
@@ -257,6 +257,7 @@ while True:
         operation = int(input("Enter action to perform: "))
     except ValueError:
         print("Invalid operation!")
+        continue
 
     if operation == 1:
         perform_sentiment_classification()
