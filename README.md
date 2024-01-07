@@ -31,3 +31,7 @@ We created a CLI application, which allows the user to perform the following act
   * Quits the program.
 ### Setup
 In order to use the CLI application, you have to download the above-mentioned dataset (https://www.kaggle.com/datasets/kazanova/sentiment140/) and unzip the csv file into the data folder and add the following header: ```target,id,date,flag,user,text```. Additionally, install all the necessary libraries that are not yet installed on your local system. After those steps have been completed, the program can then be started by running the **main.py** file.
+
+### Evaluation Results
+The results of the evaluation (the F1@k value) for the IR methods BM25 and TF-IDF with or without applying BERT can be seen in the following plot:
+![alt text](plots/evaluation_results.png)
