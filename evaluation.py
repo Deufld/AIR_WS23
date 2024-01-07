@@ -4,6 +4,8 @@ import pandas as pd
 import os.path
 from IR.bert import BERT
 import csv
+import matplotlib.pyplot as plt
+import re
 
 
 class Evaluation:
@@ -24,6 +26,8 @@ class Evaluation:
         self.ground_truth_dict_tfidf = dict()
 
         self.bert = BERT()
+
+        self.evaluation_results = []
 
     def generate_ground_truth(self, queries, object_for_calculation, dict_to_fill):
         for index, row in queries.iterrows():
@@ -50,12 +54,29 @@ class Evaluation:
                 return_dict[qid] = tmp_list
         return return_dict
 
+    def output_plot_for_evaluation(self):
+        x_axis = ["BM25", "BM25 with BERT", "TF-IDF", "TF-IDF with BERT"]
+        y_axis = self.evaluation_results
+
+        fig = plt.figure(figsize=(10, 5))
+        plt.bar(x_axis, y_axis, color='maroon', width=0.4)
+
+        plt.xlabel("Performed IR Metrics")
+        plt.ylabel("Percentage")
+        plt.title("Evaluation Results with IR Metrics")
+        plt.savefig('plots/evaluation_results.png')
+
     def perform_evaluation(self):
         if os.path.exists('data/evaluation_results.csv'):
             with open('data/evaluation_results.csv') as f:
                 reader = csv.reader(f)
                 for row in reader:
-                    print(", ".join(row))
+                    str_row = ", ".join(row)
+                    print(str_row)
+                    number_str = re.findall("\d+\.\d+", str_row)[0]
+                    self.evaluation_results.append(float(number_str) * 100)
+
+            self.output_plot_for_evaluation()
             return
         else:
             if os.path.exists('data/ground_truth_bm25.csv') and os.path.exists('data/ground_truth_tfidf.csv'):
